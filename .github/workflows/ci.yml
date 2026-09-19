@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Build plugin
+        run: bun scripts/build-plugin.mjs
+
+      - name: Verify the built artifact is current
+        run: bun scripts/build-plugin.mjs --check
+
+      - name: Tests
+        run: bun test
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Hermetic hook self-test (built bundle)
+        run: node .agents/skills/codebuddy-qa/scripts/drive.mjs --self-test
