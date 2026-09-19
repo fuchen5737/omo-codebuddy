@@ -1,0 +1,16 @@
+{
+  "$comment": "Optional per-agent model binding for CodeBuddy. Values are model ids exactly as they appear in CodeBuddy (the IDE model picker, or the `id` field of a custom model in ~/.codebuddy/models.json). An empty string or a missing key means the agent runs on the session default model. `effort` maps to the CodeBuddy agent frontmatter field of the same name; leave it empty to keep the agent's own default.",
+  "agents": {
+    "oracle": "",
+    "explore": "",
+    "librarian": "",
+    "multimodal-looker": "",
+    "metis": "",
+    "momus": "",
+    "prometheus": ""
+  },
+  "effort": {
+    "oracle": "high",
+    "explore": "low"
+  }
+}

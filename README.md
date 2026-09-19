@@ -58,6 +58,47 @@ Inside a running session / the IDE, the same flow is `/plugin marketplace add
 - **memory** — `.codebuddy/omo-memory.md` in your project is injected on session
   start and written through `/omo:remember`.
 
+## Model routing (per-role models)
+
+CodeBuddy resolves a **subagent's** model from the subagent definition itself:
+the `task` tool takes no model argument, and a hook cannot rewrite a model
+choice (it can only rewrite tool input, inject context, or block). So the way to
+"use the right model automatically" is to bind models to **roles** — the main
+agent routes work with `task(subagent_name: …)` and each role then runs on its
+own model.
+
+| Role | What it is good for |
+|---|---|
+| `explore` | the cheapest fast model you have — it only searches and reports |
+| `librarian` | a long-context model — it reads docs and whole repositories |
+| `oracle` | your strongest reasoning model — it is the second opinion |
+| `metis` / `momus` | also strong: they pressure-test and review plans before work starts |
+| `prometheus` | a strong planning model — it writes the decision-complete plan |
+| `multimodal-looker` | any model with image/PDF support |
+
+Edit `agent-models.json`, rebuild, reinstall:
+
+```json
+{
+  "agents": { "oracle": "<model-id>", "explore": "<model-id>" },
+  "effort": { "oracle": "high", "explore": "low" }
+}
+```
+
+Values are model ids exactly as CodeBuddy shows them (the IDE model picker, or
+the `id` field of a custom model in `~/.codebuddy/models.json`). An empty string
+keeps the session default; the build prints the binding it applied:
+
+```bash
+bun scripts/build-plugin.mjs          # → "model binding: oracle→…, explore→…"
+bun scripts/install-local.mjs install --scope user
+codebuddy plugin marketplace add ~/.codebuddy/plugins/omo-local
+codebuddy plugin install omo@omo-local
+```
+
+Then reload (`/reload-plugins`) or restart the IDE. Verify in `/agents` that each
+agent shows the model you bound.
+
 ## Build
 
 ```bash

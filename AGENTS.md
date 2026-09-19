@@ -57,6 +57,29 @@ literal starting with `# Intelligent Refactor Command`), which silently ate the
 skill body on a re-run. Any change to the section MUST keep strip→insert
 idempotent — `test/generators.test.ts` asserts that against the built artifacts.
 
+## Model routing (role-bound, never runtime)
+
+CodeBuddy has exactly ONE channel for choosing a subagent's model: the `model`
+field in the agent definition. The `task` tool takes no model argument, and a
+hook (`PreToolUse` `modifiedInput` included) can only rewrite tool input, inject
+context, or block — none of that reaches model selection. Do not "fix" this by
+inventing a model hook; there is no wire for it.
+
+The adapter therefore binds models to ROLES via `agent-models.json`, applied at
+build time by `applyModelBinding()` in `scripts/build-agents.mjs`:
+
+```json
+{ "agents": { "oracle": "<model-id>", "explore": "<model-id>" },
+  "effort": { "oracle": "high", "explore": "low" } }
+```
+
+- Values are CodeBuddy model ids (the IDE picker's name, or the `id` of a custom
+  model in `~/.codebuddy/models.json`). Empty/missing = session default.
+- The build prints the applied binding; `--check` covers it too.
+- `test/generators.test.ts` covers inject / replace / clear / unknown-agent.
+- The main agent "routes" by choosing WHICH subagent to call, so the bindings
+  are only as useful as the agent descriptions (they drive that choice).
+
 ## QA
 
 ```bash

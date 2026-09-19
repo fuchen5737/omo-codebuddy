@@ -4,7 +4,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { adaptSkillForCodeBuddy, insertCodeBuddyCompatibility, stripSection } from "../scripts/build-skills.mjs";
-import { parseFrontmatter, validateAgentFile } from "../scripts/build-agents.mjs";
+import {
+	applyModelBinding,
+	normalizeBinding,
+	parseFrontmatter,
+	validateAgentFile,
+} from "../scripts/build-agents.mjs";
 import { buildMcpConfig } from "../scripts/generate-mcp.mjs";
 import { parseArgs, marketplaceDir, installedPluginDir, settingsPathFor } from "../scripts/install-local.mjs";
 import { validatePlugin } from "../scripts/validate-plugin.mjs";
@@ -102,6 +107,44 @@ describe("agent sources", () => {
 	test("rejects an agent without frontmatter", () => {
 		expect(parseFrontmatter("# no frontmatter\n")).toBeNull();
 		expect(() => validateAgentFile("x.md", "# nope\n")).toThrow();
+	});
+
+	test("applies the configured model and effort to the frontmatter", () => {
+		const source = `---\nname: oracle\ndescription: d\ntools: Read\n---\n\n${"x".repeat(300)}`;
+		const bound = applyModelBinding("oracle.md", source, {
+			agents: { oracle: "gpt-6-astra" },
+			effort: { oracle: "high" },
+		});
+		const parsed = parseFrontmatter(bound);
+		expect(parsed?.fields.model).toBe("gpt-6-astra");
+		expect(parsed?.fields.effort).toBe("high");
+		expect(parsed?.fields.tools).toBe("Read");
+	});
+
+	test("replaces an existing model line instead of duplicating it", () => {
+		const source = `---\nname: oracle\ndescription: d\nmodel: old-model\n---\n\n${"x".repeat(300)}`;
+		const bound = applyModelBinding("oracle.md", source, { agents: { oracle: "new-model" }, effort: {} });
+		expect(bound.match(/^model:/gm)?.length).toBe(1);
+		expect(parseFrontmatter(bound)?.fields.model).toBe("new-model");
+	});
+
+	test("drops the model line when the binding is cleared", () => {
+		const source = `---\nname: oracle\ndescription: d\nmodel: old-model\neffort: high\n---\n\n${"x".repeat(300)}`;
+		const cleared = applyModelBinding("oracle.md", source, { agents: {}, effort: {} });
+		const fields = parseFrontmatter(cleared)?.fields ?? {};
+		expect(fields.model).toBeUndefined();
+		expect(fields.effort).toBeUndefined();
+		expect(fields.description).toBe("d");
+	});
+
+	test("rejects a binding that names an unknown agent", () => {
+		expect(() => normalizeBinding({ agents: { nope: "m" } }, ["oracle"])).toThrow(/unknown agents/);
+		expect(() => normalizeBinding({ agents: { oracle: "m" } }, ["oracle"])).not.toThrow();
+	});
+
+	test("leaves agents untouched when nothing is configured", () => {
+		const source = `---\nname: explore\ndescription: d\n---\n\n${"x".repeat(300)}`;
+		expect(applyModelBinding("explore.md", source, { agents: {}, effort: {} })).toBe(source);
 	});
 
 	test("rejects an agent with a stub body", () => {
