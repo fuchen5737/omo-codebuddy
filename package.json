@@ -1,0 +1,32 @@
+{
+  "name": "omo-codebuddy",
+  "version": "5.0.0-beta.78",
+  "type": "module",
+  "description": "oh-my-openagent (omo) for CodeBuddy: a CodeBuddy plugin with ultrawork mode, ulw workflows, workflow agents, work-plan continuation, comment checking and MCP servers.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fuchen5737/omo-codebuddy.git"
+  },
+  "keywords": [
+    "codebuddy",
+    "plugin",
+    "omo",
+    "oh-my-openagent",
+    "ultrawork",
+    "ulw",
+    "agents"
+  ],
+  "scripts": {
+    "build": "bun scripts/build-plugin.mjs",
+    "build:check": "bun scripts/build-plugin.mjs --check",
+    "install:local": "bun scripts/install-local.mjs install",
+    "uninstall:local": "bun scripts/install-local.mjs uninstall",
+    "test": "bun test test",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.9.0"
+  }
+}

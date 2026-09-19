@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "name": "plugin dir exists",
+      "ok": true
+    },
+    {
+      "name": "hook bundle exists",
+      "ok": true
+    },
+    {
+      "name": "candidates listed",
+      "ok": true
+    },
+    {
+      "name": "hook runs",
+      "ok": true
+    },
+    {
+      "name": "hook injects ultrawork",
+      "ok": true
+    },
+    {
+      "name": "hook stays silent without a trigger",
+      "ok": true
+    }
+  ],
+  "failed": []
+}

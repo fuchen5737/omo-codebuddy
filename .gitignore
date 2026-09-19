@@ -1,0 +1,12 @@
+# Built plugin artifacts (regenerate with `bun scripts/build-plugin.mjs`).
+# The SOURCES — skills/, agents/, resources/, src/ — are tracked.
+plugin/skills/
+plugin/agents/
+plugin/commands/
+plugin/hooks/scripts/
+plugin/.mcp.json
+plugin/runtime/
+
+node_modules/
+*.log
+.DS_Store
