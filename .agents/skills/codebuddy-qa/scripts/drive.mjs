@@ -158,7 +158,7 @@ export function cliArgs(args, { timeoutMs = 60_000, home = null } = {}) {
 		home,
 		ok: result.ok,
 		status: result.status,
-		stdout: (result.stdout ?? "").slice(0, 12_000),
+		stdout: (result.stdout ?? "").slice(0, 60_000),
 		stderr: (result.stderr ?? "").slice(0, 4000),
 		error: result.error ?? null,
 	};

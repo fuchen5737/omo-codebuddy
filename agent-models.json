@@ -1,13 +1,13 @@
 {
-  "$comment": "Optional per-agent model binding for CodeBuddy. Values are model ids exactly as they appear in CodeBuddy (the IDE model picker, or the `id` field of a custom model in ~/.codebuddy/models.json). An empty string or a missing key means the agent runs on the session default model. `effort` maps to the CodeBuddy agent frontmatter field of the same name; leave it empty to keep the agent's own default.",
+  "$comment": "Per-role model binding for CodeBuddy subagents. Values are what `codebuddy --model` accepts: the tier aliases (default-model, fast-model, balanced-model, primary-model, deep-model), a concrete model id (glm-5.3, kimi-k3, gpt-5.6-terra, ...), or a custom model as `custom-local:<id>`. Tier aliases are the recommended default: CodeBuddy resolves them to whatever the account offers, so routing keeps working when you switch models. An empty string keeps the session default. `effort` is the CodeBuddy agent frontmatter field of the same name.",
   "agents": {
-    "oracle": "",
-    "explore": "",
-    "librarian": "",
-    "multimodal-looker": "",
-    "metis": "",
-    "momus": "",
-    "prometheus": ""
+    "explore": "fast-model",
+    "librarian": "balanced-model",
+    "multimodal-looker": "primary-model",
+    "oracle": "deep-model",
+    "metis": "deep-model",
+    "momus": "deep-model",
+    "prometheus": "deep-model"
   },
   "effort": {
     "oracle": "high",

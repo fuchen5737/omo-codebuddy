@@ -3,26 +3,6 @@ name: remove-ai-slops
 description: "Removes AI-generated code smells from branch changes or an explicit file list behind regression tests. Use when the user asks to clean up, deslop, or remove AI-slop patterns from recent changes."
 ---
 
-<!-- omo:codebuddy-compat -->
-## CodeBuddy Harness Tool Compatibility
-
-Some examples in this skill were written for the OpenCode harness. In CodeBuddy, translate them instead of copying them literally:
-
-| OpenCode example | CodeBuddy equivalent |
-| --- | --- |
-| `call_omo_agent(subagent_type="explore", ...)` | the `task` tool with the matching omo agent (`subagent_name: "explore"`), or `background_task` for parallel fan-out |
-| `task(category="deep", ...)` | the `task` tool with the closest agent: `oracle` for deep reasoning and review, `explore` for codebase search, `librarian` for external research |
-| `background_output(task_id=...)` | collect the subagent's returned result; there is no separate output tool |
-| `team_*(...)` | not available in CodeBuddy — use `task` / `background_task` subagents instead |
-| `load_skills: ["x"]` | name the skill inside the subagent prompt, or read `${CODEBUDDY_PLUGIN_ROOT}/skills/x/SKILL.md` |
-| a bare `skill(name="x")` call | `/omo:x`, or read the skill file directly |
-
-CodeBuddy Code runs hooks through Git Bash on Windows; inside a session, prefer the native tools over shell pipelines when a native tool exists.
-
-If a code block below conflicts with this section, this section wins.
-<!-- /omo:codebuddy-compat -->
-
-
 # Remove AI Slops Skill
 
 ## Inputs
@@ -180,9 +160,9 @@ File: src/bar.py
 
 Order rule (safest → riskiest): comments → dead code → defensive → duplication → complexity → abstraction/boundary → performance → tests → oversized-modules. This minimizes blast radius of any one change.
 
-### Phase 4: Parallel slop removal via `deep` agents in batches of 5
+### Phase 4: Parallel slop removal via `deep-low` agents in batches of 5
 
-Files are processed by `deep` category agents with the `$omo:remove-ai-slops` skill loaded, **batched 5 at a time in parallel**. The executable skill name is `remove-ai-slops`. The `deep` category gives the agent enough thoroughness to correctly evaluate the 9 categories and respect the KEEP rules without slipping into surface fixes; the 5-wide batch is the sweet spot — more than 5 creates result-merging noise and context contention, fewer wastes parallelism.
+Files are processed by `deep-low` category agents with the `$omo:remove-ai-slops` skill loaded, **batched 5 at a time in parallel**. The executable skill name is `remove-ai-slops`. The `deep-low` category gives the agent enough thoroughness to correctly evaluate the 9 categories and respect the KEEP rules without slipping into surface fixes; the 5-wide batch is the sweet spot — more than 5 creates result-merging noise and context contention, fewer wastes parallelism.
 
 **Batching protocol** (strict):
 
@@ -199,7 +179,7 @@ Files are processed by `deep` category agents with the `$omo:remove-ai-slops` sk
 
 ```
 task(
-  category="deep",
+  category="deep-low",
   load_skills=["remove-ai-slops"],
   run_in_background=true,
   description="Slop removal: {filename}",
@@ -225,7 +205,7 @@ For each skipped issue, give reason.
 )
 ```
 
-**Batch failure handling**: a `multi_agent_v1.wait_agent` timeout only means no new mailbox update arrived, not that a `deep` agent failed. For long passes, require each child to send `WORKING: <file> - <current phase>` and `BLOCKED: <reason>` only when it cannot progress. Treat a running child as alive. Mark a file for retry only when the child is completed without the deliverable, ack-only after followup, explicitly `BLOCKED:`, or no longer running. Do NOT block the remaining 4 in that batch; collect successful results and retry the failed file once later. If retry also fails, escalate that file under "Issues Found & Fixed" in the final report.
+**Batch failure handling**: a `multi_agent_v1.wait_agent` timeout only means no new mailbox update arrived, not that a `deep-low` agent failed. For long passes, require each child to send `WORKING: <file> - <current phase>` and `BLOCKED: <reason>` only when it cannot progress. Treat a running child as alive. Mark a file for retry only when the child is completed without the deliverable, ack-only after followup, explicitly `BLOCKED:`, or no longer running. Do NOT block the remaining 4 in that batch; collect successful results and retry the failed file once later. If retry also fails, escalate that file under "Issues Found & Fixed" in the final report.
 
 ### Phase 5: Verify with quality gates + critical review
 

@@ -69,16 +69,27 @@ The adapter therefore binds models to ROLES via `agent-models.json`, applied at
 build time by `applyModelBinding()` in `scripts/build-agents.mjs`:
 
 ```json
-{ "agents": { "oracle": "<model-id>", "explore": "<model-id>" },
+{ "agents": { "explore": "fast-model", "oracle": "deep-model" },
   "effort": { "oracle": "high", "explore": "low" } }
 ```
 
-- Values are CodeBuddy model ids (the IDE picker's name, or the `id` of a custom
-  model in `~/.codebuddy/models.json`). Empty/missing = session default.
+- Values are whatever `codebuddy --model` accepts (CodeBuddy Code 2.156.0+):
+  **tier aliases** `default-model` / `fast-model` / `balanced-model` /
+  `primary-model` / `deep-model`, a concrete id (`glm-5.3`, `kimi-k3`,
+  `gpt-5.6-terra`, `minimax-m3`, …), or a custom model as `custom-local:<id>`.
+  Tier aliases are the default because they resolve against the account, so the
+  routing keeps working when the user switches models.
+- Empty/missing = session default.
 - The build prints the applied binding; `--check` covers it too.
 - `test/generators.test.ts` covers inject / replace / clear / unknown-agent.
 - The main agent "routes" by choosing WHICH subagent to call, so the bindings
   are only as useful as the agent descriptions (they drive that choice).
+
+Other model-related CLI surface (2.156.0, session-scoped — NOT usable from a
+plugin): `--model`, `--fallback-model` (auto-downgrade when the default model is
+overloaded; `--print` only), `--agents <json>` (define agents for one process),
+`--settings <file-or-json>`, `--setting-sources`. A plugin cannot change the
+session's model — only the roles it defines.
 
 ## QA
 

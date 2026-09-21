@@ -3,26 +3,6 @@ name: refactor
 description: "Guides a refactor, cleanup, or restructure with the right decomposition. Use when the user asks to refactor, simplify, extract, or modernize code."
 ---
 
-<!-- omo:codebuddy-compat -->
-## CodeBuddy Harness Tool Compatibility
-
-Some examples in this skill were written for the OpenCode harness. In CodeBuddy, translate them instead of copying them literally:
-
-| OpenCode example | CodeBuddy equivalent |
-| --- | --- |
-| `call_omo_agent(subagent_type="explore", ...)` | the `task` tool with the matching omo agent (`subagent_name: "explore"`), or `background_task` for parallel fan-out |
-| `task(category="deep", ...)` | the `task` tool with the closest agent: `oracle` for deep reasoning and review, `explore` for codebase search, `librarian` for external research |
-| `background_output(task_id=...)` | collect the subagent's returned result; there is no separate output tool |
-| `team_*(...)` | not available in CodeBuddy — use `task` / `background_task` subagents instead |
-| `load_skills: ["x"]` | name the skill inside the subagent prompt, or read `${CODEBUDDY_PLUGIN_ROOT}/skills/x/SKILL.md` |
-| a bare `skill(name="x")` call | `/omo:x`, or read the skill file directly |
-
-CodeBuddy Code runs hooks through Git Bash on Windows; inside a session, prefer the native tools over shell pipelines when a native tool exists.
-
-If a code block below conflicts with this section, this section wins.
-<!-- /omo:codebuddy-compat -->
-
-
 export const REFACTOR_TEMPLATE = `# Intelligent Refactor Command
 
 ## Usage
@@ -704,7 +684,7 @@ Record the chosen path in the TodoWrite list.
 
 Rationale for this composition:
 - **4 workers = team mode's parallel cap.** 5+ just queues.
-- **No verifier team member.** Verification needs \`deep\` reasoning (or \`unspecified-high\` fallback). In-team category routing downcasts to the category worker, which is weaker than required — the verifier runs OUTSIDE the team as a \`task(category="deep")\`.
+- **No verifier team member.** Verification needs \`deep-high\` reasoning (or \`unspecified-high\` fallback). In-team category routing downcasts to the category worker, which is weaker than required — the verifier runs OUTSIDE the team as a \`task(category="deep-high")\`.
 - **quick × 2** for mechanical edits, **unspecified-low × 2** for reasoning edits — mirrors the plan's split.
 
 **Team lifecycle** (one team, reused until Phase 6 cleanup):
@@ -736,7 +716,7 @@ While any team task is \`pending | claimed | in_progress\`:
 - On a worker completion report, immediately dispatch an **external verifier** — verification runs OUTSIDE the team because team-member category routing downcasts to the category worker:
   \`\`\`
   task(
-    category="deep",
+    category="deep-high",
     load_skills=[],
     run_in_background=true,
     description="verify step <N>",

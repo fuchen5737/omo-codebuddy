@@ -80,14 +80,28 @@ Edit `agent-models.json`, rebuild, reinstall:
 
 ```json
 {
-  "agents": { "oracle": "<model-id>", "explore": "<model-id>" },
+  "agents": {
+    "explore": "fast-model",
+    "librarian": "balanced-model",
+    "multimodal-looker": "primary-model",
+    "oracle": "deep-model",
+    "metis": "deep-model",
+    "momus": "deep-model",
+    "prometheus": "deep-model"
+  },
   "effort": { "oracle": "high", "explore": "low" }
 }
 ```
 
-Values are model ids exactly as CodeBuddy shows them (the IDE model picker, or
-the `id` field of a custom model in `~/.codebuddy/models.json`). An empty string
-keeps the session default; the build prints the binding it applied:
+**Values are what `codebuddy --model` accepts** (CodeBuddy Code 2.156.0+):
+
+| Kind | Examples | When to use |
+|---|---|---|
+| Tier aliases | `default-model`, `fast-model`, `balanced-model`, `primary-model`, `deep-model` | **recommended** — CodeBuddy resolves them against your account, so routing survives a model switch |
+| Concrete ids | `glm-5.3`, `kimi-k3`, `gpt-5.6-terra`, `minimax-m3`, … | when a role needs one exact model |
+| Custom models | `custom-local:<id>` | models you added in `~/.codebuddy/models.json` (e.g. `custom-local:gpt-6-astra`) |
+
+An empty string keeps the session default; the build prints the binding it applied:
 
 ```bash
 bun scripts/build-plugin.mjs          # → "model binding: oracle→…, explore→…"
