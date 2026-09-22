@@ -1,9 +1,9 @@
 {
-  "$comment": "Per-role model binding for CodeBuddy subagents. Values are what `codebuddy --model` accepts: the tier aliases (default-model, fast-model, balanced-model, primary-model, deep-model), a concrete model id (glm-5.3, kimi-k3, gpt-5.6-terra, ...), or a custom model as `custom-local:<id>`. Tier aliases are the recommended default: CodeBuddy resolves them to whatever the account offers, so routing keeps working when you switch models. An empty string keeps the session default. `effort` is the CodeBuddy agent frontmatter field of the same name.",
+  "$comment": "Per-role model binding for CodeBuddy subagents. Values are anything `codebuddy --model` accepts. TIER ALIASES are CodeBuddy's Auto tiers, resolved server-side against your account: fast-model (快速, 0.21x credits), balanced-model (均衡, 0.65x), deep-model (极致, 1.20x) — all 200k in / 48k out with tools, images and reasoning. The concrete model behind a tier is chosen by CodeBuddy and can change (e.g. fast-model currently resolves to deepseek-4.1-flash on this account), so pin a CONCRETE ID (glm-5.3, kimi-k3, gpt-5.6-terra, ...) or a custom model as `custom-local:<id>` when a role must not move. `default-model` / `primary-model` follow the session/product default; an empty string keeps the session default too. These bindings are the LOWEST-priority declaration: `CODEBUDDY_CODE_SUBAGENT_MODEL` > a per-call model argument > project settings > user settings > this built-in declaration > main model, so you can always override any agent from the /agents panel or settings.json. `effort` maps to the CodeBuddy agent frontmatter field of the same name.",
   "agents": {
     "explore": "fast-model",
     "librarian": "balanced-model",
-    "multimodal-looker": "primary-model",
+    "multimodal-looker": "balanced-model",
     "oracle": "deep-model",
     "metis": "deep-model",
     "momus": "deep-model",

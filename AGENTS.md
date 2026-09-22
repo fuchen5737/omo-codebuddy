@@ -33,6 +33,20 @@ vendored sources here, not build inputs from somewhere else. Read
    / `install` / `list` work without auth; a turn does not. Report a turn as
    PENDING, never as a pass.
 
+## Where to read the authoritative docs
+
+The CLI ships the FULL official documentation offline (the website is a
+client-rendered SPA and cannot be fetched):
+
+```
+$(npm root -g)/@tencent-ai/codebuddy-code/dist/web-ui/docs/{cn,en}%2Fcli/*.md
+```
+
+`models.md`, `settings.md`, `sub-agents.md`, `plugins.md`,
+`plugins-reference.md`, `hooks.md`, `tools-reference.md`, `skills.md`,
+`slash-commands.md`, `cli-reference.md`. Read it before inferring a contract
+from behavior — it is versioned with the installed CLI.
+
 ## CodeBuddy contract (verified — do not re-derive)
 
 | Fact | Value |
@@ -74,12 +88,20 @@ build time by `applyModelBinding()` in `scripts/build-agents.mjs`:
 ```
 
 - Values are whatever `codebuddy --model` accepts (CodeBuddy Code 2.156.0+):
-  **tier aliases** `default-model` / `fast-model` / `balanced-model` /
-  `primary-model` / `deep-model`, a concrete id (`glm-5.3`, `kimi-k3`,
+  **Auto tier aliases** `fast-model` (快速, 0.21× credits) / `balanced-model`
+  (均衡, 0.65×) / `deep-model` (极致, 1.20×), the follow-the-leader aliases
+  `default-model` / `primary-model`, a concrete id (`glm-5.3`, `kimi-k3`,
   `gpt-5.6-terra`, `minimax-m3`, …), or a custom model as `custom-local:<id>`.
-  Tier aliases are the default because they resolve against the account, so the
-  routing keeps working when the user switches models.
+  **A tier is a route, not a model**: CodeBuddy resolves it server-side (on this
+  account `fast-model` currently lands on `deepseek-4.1-flash`), so tiers
+  survive a model switch but a role that must NOT move needs a concrete id.
 - Empty/missing = session default.
+- **These bindings are the LOWEST-priority declaration.** Official chain:
+  `CODEBUDDY_CODE_SUBAGENT_MODEL` > per-call model argument > project settings >
+  user settings > this built-in declaration > main model. Users override any
+  agent from the `/agents` panel or `settings.json`:
+  `{"subagents": {"agents": {"<name>": {"model": "lite|reasoning|inherit|default|<id>"}}}}`.
+  Never try to enforce a model from a hook — the priority chain is the contract.
 - The build prints the applied binding; `--check` covers it too.
 - `test/generators.test.ts` covers inject / replace / clear / unknown-agent.
 - The main agent "routes" by choosing WHICH subagent to call, so the bindings

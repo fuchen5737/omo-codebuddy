@@ -97,9 +97,36 @@ Edit `agent-models.json`, rebuild, reinstall:
 
 | Kind | Examples | When to use |
 |---|---|---|
-| Tier aliases | `default-model`, `fast-model`, `balanced-model`, `primary-model`, `deep-model` | **recommended** — CodeBuddy resolves them against your account, so routing survives a model switch |
-| Concrete ids | `glm-5.3`, `kimi-k3`, `gpt-5.6-terra`, `minimax-m3`, … | when a role needs one exact model |
+| **Auto tier aliases** | `fast-model` (快速, **0.21×** credits), `balanced-model` (均衡, **0.65×**), `deep-model` (极致, **1.20×**) | **recommended** — CodeBuddy resolves the tier against your account (all three are 200k in / 48k out with tools, images and reasoning), so the routing keeps working when models change |
+| Follow-the-leader aliases | `default-model`, `primary-model` | when a role should just ride the session/default model |
+| Concrete ids | `glm-5.3`, `kimi-k3`, `gpt-5.6-terra`, `minimax-m3`, … | when a role must NOT move |
 | Custom models | `custom-local:<id>` | models you added in `~/.codebuddy/models.json` (e.g. `custom-local:gpt-6-astra`) |
+
+**A tier is a route, not a model.** `fast-model` currently lands on
+`deepseek-4.1-flash` on this account; CodeBuddy picks the concrete model, so the
+same tier can resolve differently over time or per account. Pin a concrete id if
+that matters for a role.
+
+### Overriding the defaults
+
+These bindings are the **lowest-priority** declaration. The full chain is:
+
+```
+CODEBUDDY_CODE_SUBAGENT_MODEL  >  per-call model argument  >  project settings
+  >  user settings  >  this plugin's agent declaration  >  main model
+```
+
+So a user can always override any agent without touching this repository —
+either in the `/agents` panel (visual, writes `settings.json`) or directly:
+
+```json
+{ "subagents": { "agents": { "oracle": { "model": "deep-model" },
+                             "explore": { "model": "lite" } } } }
+```
+
+`subagents.agents.<name>.model` accepts a model id, name, alias, `lite` /
+`reasoning`, or `inherit` / `default`. `variantModels` maps the `lite` and
+`reasoning` scenario variants globally (`/model:lite`, `/model:reasoning`).
 
 An empty string keeps the session default; the build prints the binding it applied:
 
